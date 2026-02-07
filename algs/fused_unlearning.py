@@ -230,6 +230,7 @@ class FUSED(Base):
         all_client_models = list()
         global_model = unlearning_model
         result_list = []
+        pd.set_option('display.max_rows', None)
 
         all_global_models.append(global_model)
         std_time = time.time()
@@ -259,6 +260,7 @@ class FUSED(Base):
             end_time = time.time()
 
             consume_time = end_time - std_time
+            avg_f_acc, avg_r_acc = 0, 0
 
             if self.args.forget_paradigm == 'client':
                 avg_f_acc, avg_r_acc, test_result_ls = test_client_forget(self, epoch, global_model, self.args,
@@ -287,7 +289,9 @@ class FUSED(Base):
 
             global_model.to('cpu')
 
-            print("Relearn Round = {}".format(epoch))
+            
+            print("Relearn Round = {} Avg Forget Acc = {}, Avg Remember Acc = {}".format(epoch,avg_f_acc, avg_r_acc))
+            print(df)
         
         if self.args.cut_sample == 1.0:
             df.to_csv('./results/{}/relearn_data_{}_distri_{}_fnum_{}_algo_{}.csv'.format(self.args.forget_paradigm,

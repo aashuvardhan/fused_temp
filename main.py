@@ -26,7 +26,7 @@ def get_args():
     parser.add_argument('--forget_paradigm', default='class', type=str, help='choose from client or class')
     parser.add_argument('--paradigm', default='fused', type=str,
                         help='choose the training paradigm:fused, federaser, retrain, infocom22, exactfun, fl, eraseclient')
-    parser.add_argument('--forget_client_idx', type=list, default=[0])
+    parser.add_argument('--forget_client_idx', type=int,nargs='+', default=[0])
     parser.add_argument('--forget_class_idx', type=list, default=[0])
     parser.add_argument('--if_retrain', default=False, type=bool, help='')
     parser.add_argument('--if_unlearning', default=False, type=bool, help='')
