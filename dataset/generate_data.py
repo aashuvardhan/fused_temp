@@ -16,15 +16,14 @@ UNK, PAD = '<UNK>', '<PAD>'
 
 
 def data_init(FL_params):
-    kwargs = {'num_workers': 0, 'pin_memory': True} if FL_params.device == 'cuda' else {}
     dataset_x = []
     dataset_at = []
     dataset_y = []
 
     trainset, testset = data_set(FL_params.data_name)
 
-    test_loader = DataLoader(testset, batch_size=FL_params.test_batch_size, shuffle=True, num_workers=2, **kwargs)
-    train_loader = DataLoader(trainset, batch_size=FL_params.local_batch_size, shuffle=True, num_workers=2, **kwargs)
+    test_loader = DataLoader(testset, batch_size=FL_params.test_batch_size, shuffle=True, num_workers=0, pin_memory=True)
+    train_loader = DataLoader(trainset, batch_size=FL_params.local_batch_size, shuffle=True, num_workers=0, pin_memory=True)
 
     for train_data in train_loader:
         x_train, y_train = train_data
@@ -61,15 +60,13 @@ def data_init(FL_params):
     return client_loaders, test_loaders, proxy_client_loaders, proxy_test_loaders
 
 def cross_data_init(FL_params):
-    kwargs = {'num_workers': 0, 'pin_memory': True} if FL_params.device == 'cuda' else {}
     dataset_x = []
     dataset_y = []
 
     trainset, testset = data_set(FL_params.data_name)
 
-    test_loader = DataLoader(testset, batch_size=FL_params.test_batch_size, shuffle=True, num_workers=2, **kwargs)
-    train_loader = DataLoader(trainset, batch_size=FL_params.local_batch_size, shuffle=True, num_workers=2,
-                              **kwargs)
+    test_loader = DataLoader(testset, batch_size=FL_params.test_batch_size, shuffle=True, num_workers=0, pin_memory=True)
+    train_loader = DataLoader(trainset, batch_size=FL_params.local_batch_size, shuffle=True, num_workers=0, pin_memory=True)
 
     for train_data in train_loader:
         x_train, y_train = train_data

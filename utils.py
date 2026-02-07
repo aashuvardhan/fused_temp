@@ -450,8 +450,8 @@ def membership_inference_attack(args, unlearning_model, case, model, client_all_
             unlearning_model.to(args.device)
             images, labels = data[0].to(args.device), data[1].to(args.device)
             outputs = unlearning_model(images)
-            test_x.extend(outputs.cpu().detach())
-            test_x_user[i].extend(outputs.cpu().detach())
+            test_x.extend(outputs.cpu().detach().numpy())
+            test_x_user[i].extend(outputs.cpu().detach().numpy())
             labels = labels.cpu()
             if args.forget_paradigm == 'class':
                 matrix = np.ones(len(labels))
@@ -481,7 +481,7 @@ def membership_inference_attack(args, unlearning_model, case, model, client_all_
         for data in test_loader:
             images, labels = data[0].to(args.device), data[1].to(args.device)
             outputs = unlearning_model(images)
-            test_x.extend(outputs.cpu().detach())
+            test_x.extend(outputs.cpu().detach().numpy())
             labels = labels.cpu()
             matrix = np.ones(len(labels))
             unlearn_idx = np.where(np.isin(labels, args.forget_class_idx))[0]
@@ -495,8 +495,8 @@ def membership_inference_attack(args, unlearning_model, case, model, client_all_
             for data in test_loader:
                 images, labels = data[0].to(args.device), data[1].to(args.device)
                 outputs = unlearning_model(images)
-                test_x.extend(outputs.cpu().detach())
-                test_x_user[i].extend(outputs.cpu().detach())
+                test_x.extend(outputs.cpu().detach().numpy())
+                test_x_user[i].extend(outputs.cpu().detach().numpy())
                 labels = labels.cpu()
                 if i in args.forget_client_idx:
                     test_y.extend(np.zeros(len(labels)))
@@ -511,8 +511,8 @@ def membership_inference_attack(args, unlearning_model, case, model, client_all_
             for batch_idx, data in enumerate(test_loader):
                 images, labels = data[0].to(args.device), data[1].to(args.device)
                 outputs = unlearning_model(images)
-                test_x.extend(outputs.cpu().detach())
-                test_x_user[i].extend(outputs.cpu().detach())
+                test_x.extend(outputs.cpu().detach().numpy())
+                test_x_user[i].extend(outputs.cpu().detach().numpy())
                 labels = labels.cpu()
                 test_y.extend(np.ones(len(labels)))
                 test_y_user[i].extend(np.ones(len(labels)))
@@ -620,8 +620,8 @@ def train_shadow_model(args, case, model, proxy_client_loaders_bk, proxy_client_
                 shadow_unlearning_model.to(args.device)
                 images, labels = data[0].to(args.device), data[1].to(args.device)
                 outputs = shadow_unlearning_model(images)
-                attack_x_train.extend(outputs.cpu().detach())
-                attack_x_train_user[user].extend(outputs.cpu().detach())
+                attack_x_train.extend(outputs.cpu().detach().numpy())
+                attack_x_train_user[user].extend(outputs.cpu().detach().numpy())
                 labels = labels.cpu() 
                 if args.forget_paradigm == 'class':
                     matrix = np.ones(len(labels))
@@ -651,8 +651,8 @@ def train_shadow_model(args, case, model, proxy_client_loaders_bk, proxy_client_
                     images, labels = data[0].to(args.device), data[1].to(args.device)
                     labels = labels.cpu()
                     outputs = shadow_unlearning_model(images)
-                    attack_x_train.extend(outputs.cpu().detach())
-                    attack_x_train_user[user].extend(outputs.cpu().detach())
+                    attack_x_train.extend(outputs.cpu().detach().numpy())
+                    attack_x_train_user[user].extend(outputs.cpu().detach().numpy())
                     if user in args.forget_client_idx:
                         attack_y_train.extend(np.zeros(len(labels)))
                         attack_y_train_user[user].extend(np.zeros(len(labels)))
@@ -667,7 +667,7 @@ def train_shadow_model(args, case, model, proxy_client_loaders_bk, proxy_client_
             for data in attack_test_loader:
                 images, labels = data[0].to(args.device), data[1].to(args.device)
                 outputs = shadow_unlearning_model(images)
-                attack_x_train.extend(outputs.cpu().detach())
+                attack_x_train.extend(outputs.cpu().detach().numpy())
                 labels = labels.cpu()
 
                 matrix = np.ones(len(labels))
@@ -681,7 +681,7 @@ def train_shadow_model(args, case, model, proxy_client_loaders_bk, proxy_client_
             for batch_idx, data in enumerate(attack_test_loader):
                 images, labels = data[0].to(args.device), data[1].to(args.device)
                 outputs = shadow_unlearning_model(images)
-                attack_x_train.extend(outputs.cpu().detach())
+                attack_x_train.extend(outputs.cpu().detach().numpy())
                 labels = labels.cpu()
                 attack_y_train.extend(np.ones(len(labels)))
                 classes_train.extend(labels)

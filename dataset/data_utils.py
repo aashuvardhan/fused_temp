@@ -31,13 +31,13 @@ def data_set(data_name):
                                      transforms.Normalize((0.1307,), (0.3081,))
                                  ]))
     elif (data_name == 'fashionmnist'):
-        trainset = datasets.MNIST('./dataset/fashionmnist', train=True, download=True,
+        trainset = datasets.FashionMNIST('./dataset/fashionmnist', train=True, download=True,
                                   transform=transforms.Compose([
                                       transforms.ToTensor(),
                                       transforms.Normalize((0.1307,), (0.3081,))
                                   ]))
 
-        testset = datasets.MNIST('./dataset/fashionmnist', train=False, download=True,
+        testset = datasets.FashionMNIST('./dataset/fashionmnist', train=False, download=True,
                                  transform=transforms.Compose([
                                      transforms.ToTensor(),
                                      transforms.Normalize((0.1307,), (0.3081,))
@@ -249,7 +249,7 @@ def split_data(X, y, args, client_at=None):
 
         train_data = [(x, y) for x, y in zip(X_train, y_train)]
         test_data = [(x, y) for x, y in zip(X_test, y_test)]
-        client_loaders.append(DataLoader(train_data, batch_size=args.local_batch_size, shuffle=True, num_workers=2,))
+        client_loaders.append(DataLoader(train_data, batch_size=args.local_batch_size, shuffle=True, num_workers=0,))
         test_loaders.append(DataLoader(test_data, batch_size=args.test_batch_size, shuffle=True))
 
     del X, y
