@@ -230,7 +230,7 @@ class FUSED(Base):
         all_client_models = list()
         global_model = unlearning_model
         result_list = []
-        pd.set_option('display.max_rows', None)
+        #pd.set_option('display.max_rows', None)
 
         all_global_models.append(global_model)
         std_time = time.time()
@@ -291,7 +291,7 @@ class FUSED(Base):
 
             
             print("Relearn Round = {} Avg Forget Acc = {}, Avg Remember Acc = {}".format(epoch,avg_f_acc, avg_r_acc))
-            print(df)
+            #print(df)
         
         if self.args.cut_sample == 1.0:
             df.to_csv('./results/{}/relearn_data_{}_distri_{}_fnum_{}_algo_{}.csv'.format(self.args.forget_paradigm,
