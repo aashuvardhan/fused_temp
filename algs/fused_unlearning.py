@@ -237,8 +237,12 @@ class FUSED(Base):
         for epoch in range(self.args.global_epoch):
             if self.args.forget_paradigm == 'client':
                 select_client_loaders = list()
+                '''
                 for idx in self.args.forget_client_idx:
                     select_client_loaders.append(client_all_loaders[idx])
+                '''
+                select_client_loaders=client_all_loaders
+                
             elif self.args.forget_paradigm == 'class':
                 select_client_loaders = list()
                 client_loaders = select_forget_class(self.args, copy.deepcopy(client_all_loaders))
