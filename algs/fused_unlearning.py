@@ -137,6 +137,26 @@ class FUSED(Base):
                         self.args.data_name,
                         self.args.alpha,
                         len(self.args.forget_class_idx), self.args.cut_sample))
+                
+        
+        # =====================================================================
+        # NEW CODE: Retrieve and save the original Phase 1 model
+        # =====================================================================
+        print("Unlearning complete. Extracting the original Phase 1 base model...")
+        
+        # We use deepcopy so we don't accidentally destroy the fused_model we need to return
+        temp_fused_model = copy.deepcopy(fused_model)
+        
+        # Drop the adapters and extract the frozen Phase 1 base model
+        original_restored_model = temp_fused_model.lora_model.unload()
+        
+        # Save this restored model to the hard drive so you can inspect it later
+        torch.save(original_restored_model.state_dict(), 'save_model/restored_phase1_model_{}.pth'.format(self.args.data_name))
+        print("Original Phase 1 model successfully restored and saved to disk!")
+        # =====================================================================
+
+        # We return the FUSED model so the MIA and Relearning phases have the "cured" model to test
+        
 
         return fused_model
 
@@ -310,3 +330,72 @@ class FUSED(Base):
                                                                                       len(self.args.forget_class_idx),
                                                                                       self.args.paradigm, self.args.cut_sample), index=False)
         return
+    
+
+    def verify_restored_model(self, global_model, client_all_loaders, test_loaders):
+        print("\n" + "="*50)
+        print("VERIFYING RESTORED PHASE 1 MODEL")
+        print("="*50)
+        
+        # 1. Load the exact frozen weights we extracted and saved via .unload()
+        global_model.load_state_dict(torch.load('save_model/restored_phase1_model_{}.pth'.format(self.args.data_name)))
+        global_model.eval()
+        
+        # 2. Immediate Test: This should EXACTLY match the final epoch of Phase 1
+        if self.args.forget_paradigm == 'client':
+            avg_f_acc, avg_r_acc, _ = test_client_forget(self, 0, global_model, self.args, test_loaders)
+            print("INITIAL RESTORED STATE -> Avg Forget Acc: {:.4f}, Avg Remember Acc: {:.4f}".format(avg_f_acc, avg_r_acc))
+            
+        elif self.args.forget_paradigm == 'sample':
+            avg_jingdu, avg_acc_zero, avg_test_acc, _ = test_backdoor_forget(self, 0, global_model, self.args, test_loaders)
+            print("INITIAL RESTORED STATE -> Avg Forget Acc: {:.4f}, Avg Remember Acc: {:.4f}".format(avg_acc_zero, avg_test_acc))
+            
+        elif self.args.forget_paradigm == 'class':
+            avg_f_acc, avg_r_acc, _ = test_class_forget(self, 0, global_model, self.args, test_loaders)
+            print("INITIAL RESTORED STATE -> Avg Forget Acc: {:.4f}, Avg Remember Acc: {:.4f}".format(avg_f_acc, avg_r_acc))
+
+        print("\nStarting Continual FL Training on Restored Model...")
+        checkpoints_ls = []
+        result_list = []
+        std_time = time.time()
+        
+        # 3. The 50-Epoch Global Loop using ALL clients (Poisoned + Clean)
+        for epoch in range(self.args.global_epoch):
+            global_model.train()
+            
+            # Select ALL clients for standard federated training
+            select_client_loaders = client_all_loaders 
+            
+            # Local training and aggregation
+            client_models = self.global_train_once(epoch, global_model, select_client_loaders, test_loaders, self.args, checkpoints_ls)
+            avg_model = self.fedavg(client_models)
+            global_model.load_state_dict(avg_model.state_dict())
+            
+            global_model.eval()
+            
+            # Evaluate and log the trajectory
+            if self.args.forget_paradigm == 'client':
+                avg_f_acc, avg_r_acc, test_result_ls = test_client_forget(self, epoch+1, global_model, self.args, test_loaders)
+                result_list.extend(test_result_ls)
+                print('Restored Model - Epoch {}, Avg_r_acc: {:.4f}, Avg_f_acc: {:.4f}'.format(epoch+1, avg_r_acc, avg_f_acc))
+                
+            elif self.args.forget_paradigm == 'sample':
+                avg_jingdu, avg_acc_zero, avg_test_acc, test_result_ls = test_backdoor_forget(self, epoch+1, global_model, self.args, test_loaders)
+                result_list.extend(test_result_ls)
+                print('Restored Model - Epoch {}, Avg_r_acc: {:.4f}, Avg_f_acc: {:.4f}'.format(epoch+1, avg_test_acc, avg_acc_zero))
+                
+            elif self.args.forget_paradigm == 'class':
+                avg_f_acc, avg_r_acc, test_result_ls = test_class_forget(self, epoch+1, global_model, self.args, test_loaders)
+                result_list.extend(test_result_ls)
+                print('Restored Model - Epoch {}, Avg_r_acc: {:.4f}, Avg_f_acc: {:.4f}'.format(epoch+1, avg_r_acc, avg_f_acc))
+
+        # 4. Save the trajectory to a CSV for graphing
+        if self.args.forget_paradigm in ['client', 'class']:
+            df = pd.DataFrame(result_list, columns=['Epoch', 'Client_id', 'Class_id', 'Label_num', 'Test_acc', 'Test_loss'] if self.args.forget_paradigm == 'client' else ['Epoch', 'Client_id', 'Class_id', 'Test_acc', 'Test_loss'])
+        else:
+            df = pd.DataFrame(result_list, columns=['Epoch', 'Client_id', 'Jingdu', 'Acc_zero', 'Test_acc'])
+            
+        df['Consume_time'] = time.time() - std_time
+        df.to_csv('./results/{}/restored_model_verification_{}_distri_{}.csv'.format(self.args.forget_paradigm, self.args.data_name, self.args.alpha), index=False)
+        
+        return global_model
