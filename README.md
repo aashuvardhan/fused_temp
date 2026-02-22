@@ -23,3 +23,13 @@ transformers==4.37.2
 python main.py --data_name='fashionmnist' --forget_paradigm='client' --paradigm='fused'  --global_epoch=100 --local_epoch=5 --alpha=1.0
 ```
 
+```angular2html
+python main.py --data_name='cifar10' --model='CNN_Cifar10' --forget_paradigm='client' --paradigm='fused' --global_epoch=100 --local_epoch=5 --alpha=1.0 --forget_client_idx 3 9 13 19 23 29 33 39 43
+```
+
+```angular2html
+python main.py --data_name='cifar100' --model='CNN_Cifar100' --forget_paradigm='client' --paradigm='fused' --global_epoch=100 --local_epoch=5 --alpha=1.0 --forget_client_idx 3 9 13 19 23 29 33 39 43
+```
+```angular2html
+python main.py --data_name='fashionmnist' --forget_paradigm='client' --paradigm='fused'  --global_epoch=100 --local_epoch=5 --alpha=1.0 --forget_client_idx 3 9 13 19 23 29 33 39 43
+```
