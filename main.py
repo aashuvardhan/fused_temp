@@ -112,7 +112,7 @@ if __name__ == '__main__':
                                                     test_loaders_process)
         
         end = time.perf_counter()
-        print(f"Elapsed time: {end - start:.6f} seconds")
+        print(f"Elapsed time of Unlearning: {end - start:.6f} seconds")
 
         if args.MIT:
             args.save_normal_result = False
