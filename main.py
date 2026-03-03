@@ -101,9 +101,19 @@ if __name__ == '__main__':
         proxy_client_loaders_process, proxy_test_loaders_process = baizhanting_attack(args, copy.deepcopy(
             proxy_client_loaders), copy.deepcopy(proxy_test_loaders))
         model, all_client_models = case.train_normal(model, client_all_loaders_process, test_loaders_process)
+
+        import time
+
+        start = time.perf_counter()
+
         args.if_unlearning = True
+
         unlearning_model = case.forget_client_train(copy.deepcopy(model), copy.deepcopy(client_all_loaders),
                                                     test_loaders_process)
+        
+        end = time.perf_counter()
+        print(f"Elapsed time: {end - start:.6f} seconds")
+
         if args.MIT:
             args.save_normal_result = False
             membership_inference_attack(args, unlearning_model, case, copy.deepcopy(model), client_all_loaders_process,
