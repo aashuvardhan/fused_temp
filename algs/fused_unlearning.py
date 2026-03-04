@@ -81,6 +81,11 @@ class FUSED(Base):
         return global_model, client_models
 
     def forget_client_train(self, global_model, client_all_loaders, test_loaders,var_unlearning=False):
+
+        if(var_unlearning==True):
+            print("Starting FUSED Unlearning Phase...")
+
+
         global_model.load_state_dict(torch.load('save_model/global_model_{}.pth'.format(self.args.data_name)))
         avg_f_acc, avg_r_acc, test_result_ls = test_client_forget(self, 1, global_model, self.args,
                                                                   test_loaders)
