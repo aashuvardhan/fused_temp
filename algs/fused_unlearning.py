@@ -83,6 +83,7 @@ class FUSED(Base):
     def forget_client_train(self, global_model, client_all_loaders, test_loaders,var_unlearning=False):
 
         if(var_unlearning==True):
+            print("\n" + "="*50)
             print("Starting FUSED Unlearning Phase...")
 
 

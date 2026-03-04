@@ -123,7 +123,11 @@ if __name__ == '__main__':
                                         proxy_test_loaders_process)
             args.save_normal_result = True
         if args.relearn:
+            print("\n" + "="*50)
+            print("Starting Relearning Phase...")
             case.relearn_unlearning_knowledge(unlearning_model, client_all_loaders_process, test_loaders_process)
+        print("\n" + "="*50)
+        print("Verifying Restored Model...")
         case.verify_restored_model(copy.deepcopy(model), client_all_loaders_process, test_loaders_process)
     elif args.forget_paradigm == 'class':
         client_all_loaders_bk = copy.deepcopy(client_all_loaders)
