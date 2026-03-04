@@ -108,8 +108,10 @@ if __name__ == '__main__':
 
         args.if_unlearning = True
 
+        var_unlearning=True
+
         unlearning_model = case.forget_client_train(copy.deepcopy(model), copy.deepcopy(client_all_loaders),
-                                                    test_loaders_process)
+                                                    test_loaders_process,var_unlearning)
         
         end = time.perf_counter()
         print(f"Elapsed time of Unlearning: {end - start:.6f} seconds")

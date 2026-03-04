@@ -80,7 +80,7 @@ class FUSED(Base):
 
         return global_model, client_models
 
-    def forget_client_train(self, global_model, client_all_loaders, test_loaders):
+    def forget_client_train(self, global_model, client_all_loaders, test_loaders,var_unlearning=False):
         global_model.load_state_dict(torch.load('save_model/global_model_{}.pth'.format(self.args.data_name)))
         avg_f_acc, avg_r_acc, test_result_ls = test_client_forget(self, 1, global_model, self.args,
                                                                   test_loaders)
@@ -139,23 +139,24 @@ class FUSED(Base):
                         len(self.args.forget_class_idx), self.args.cut_sample))
                 
         
-        # =====================================================================
-        # NEW CODE: Retrieve and save the original Phase 1 model
-        # =====================================================================
-        print("Unlearning complete. Extracting the original Phase 1 base model...")
-        
-        # We use deepcopy so we don't accidentally destroy the fused_model we need to return
-        temp_fused_model = copy.deepcopy(fused_model)
-        
-        # Drop the adapters and extract the frozen Phase 1 base model
-        original_restored_model = temp_fused_model.lora_model.unload()
-        
-        # Save this restored model to the hard drive so you can inspect it later
-        torch.save(original_restored_model.state_dict(), 'save_model/restored_phase1_model_{}.pth'.format(self.args.data_name))
-        print("Original Phase 1 model successfully restored and saved to disk!")
-        # =====================================================================
+        if(var_unlearning==True):
+            # =====================================================================
+            # NEW CODE: Retrieve and save the original Phase 1 model
+            # =====================================================================
+            print("Unlearning complete. Extracting the original Phase 1 base model...")
+            
+            # We use deepcopy so we don't accidentally destroy the fused_model we need to return
+            temp_fused_model = copy.deepcopy(fused_model)
+            
+            # Drop the adapters and extract the frozen Phase 1 base model
+            original_restored_model = temp_fused_model.lora_model.unload()
+            
+            # Save this restored model to the hard drive so you can inspect it later
+            torch.save(original_restored_model.state_dict(), 'save_model/restored_phase1_model_{}.pth'.format(self.args.data_name))
+            print("Original Phase 1 model successfully restored and saved to disk!")
+            # =====================================================================
 
-        # We return the FUSED model so the MIA and Relearning phases have the "cured" model to test
+            # We return the FUSED model so the MIA and Relearning phases have the "cured" model to test
         
 
         return fused_model
